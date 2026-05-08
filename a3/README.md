@@ -17,6 +17,11 @@
 streamlit run app.py
 ```
 
+Streamlit Cloud 部署时请确保仓库根目录或 app 所在目录包含：
+
+- `requirements.txt`：使用 `opencv-python-headless`，不要使用 `opencv-python`
+- `runtime.txt`：固定为 `python-3.11`
+
 如果使用本机已有虚拟环境，可运行：
 
 ```bash
@@ -26,4 +31,3 @@ streamlit run app.py
 ## 使用的 Agent/LLM
 
 Codex GPT-5。
-
