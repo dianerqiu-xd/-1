@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>图像颜色空间与图像插值实验报告 - 裘典儿</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1f2933;
+      --muted: #627184;
+      --line: #d8dee8;
+      --accent: #2563eb;
+      --paper: #ffffff;
+      --soft: #f5f7fb;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #eef2f7;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      line-height: 1.72;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      padding: 14px 20px;
+      background: rgba(255, 255, 255, 0.94);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      padding: 0 16px;
+      border-radius: 6px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .button.secondary {
+      color: var(--accent);
+      background: #fff;
+    }
+
+    main {
+      width: min(980px, calc(100% - 32px));
+      margin: 28px auto;
+      padding: 42px 52px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+
+    header {
+      padding-bottom: 22px;
+      border-bottom: 2px solid var(--ink);
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 30px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 34px 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 24px 0 10px;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 8px 0;
+    }
+
+    a {
+      color: var(--accent);
+      word-break: break-all;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 8px 18px;
+      margin-top: 18px;
+      font-size: 15px;
+    }
+
+    .meta strong {
+      color: var(--muted);
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .summary div {
+      padding: 12px 14px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
+    pre {
+      overflow-x: auto;
+      padding: 16px;
+      background: #111827;
+      color: #eef2ff;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: Menlo, Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    figure {
+      margin: 22px 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      background: #fff;
+      break-inside: avoid;
+    }
+
+    figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 1px solid #edf0f5;
+    }
+
+    figcaption {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      text-align: center;
+    }
+
+    ul,
+    ol {
+      padding-left: 22px;
+    }
+
+    li {
+      margin: 4px 0;
+    }
+
+    .note {
+      padding: 12px 14px;
+      background: #eef6ff;
+      border: 1px solid #bfd8ff;
+      border-radius: 6px;
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .toolbar {
+        display: none;
+      }
+
+      main {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        border: 0;
+      }
+
+      a {
+        color: #000;
+        text-decoration: none;
+      }
+
+      h2 {
+        break-after: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="toolbar">
+    <a class="button" href="./final_report.pdf" download>下载 PDF</a>
+    <button class="button secondary" type="button" onclick="window.print()">浏览器另存为 PDF</button>
+    <a class="button secondary" href="https://zhousizuoyeafirst.streamlit.app/" target="_blank" rel="noopener">打开 Streamlit 网站</a>
+  </nav>
+
+  <main>
+    <header>
+      <h1>图像颜色空间与图像插值实验报告</h1>
+      <p>Vibe Coding 图像处理实验：颜色空间通道拆分、HSV 手写转换、最近邻插值、双线性插值与 Streamlit 云端部署。</p>
+      <section class="meta">
+        <strong>姓名</strong><span>裘典儿</span>
+        <strong>学号</strong><span>2025213456</span>
+        <strong>题目</strong><span>Vibe Coding 图像颜色空间、图像插值</span>
+        <strong>使用 Agent</strong><span>Codex</span>
+        <strong>技术栈</strong><span>Python、OpenCV、NumPy、Matplotlib、Streamlit</span>
+        <strong>在线 URL</strong><span><a href="https://zhousizuoyeafirst.streamlit.app/" target="_blank" rel="noopener">https://zhousizuoyeafirst.streamlit.app/</a></span>
+      </section>
+    </header>
+
+    <section>
+      <h2>一、作业内容</h2>
+      <p>本次作业要求使用基于 LLM 的 Vibe Coding 方式，完成图像颜色空间与图像插值实验。实验需要输入图像，输出 RGB、HSV 等颜色空间中每个通道的图像，并实现最近邻插值和双线性插值，支持放大、缩小、旋转拉伸等图像操作。</p>
+      <div class="summary">
+        <div><strong>颜色空间：</strong>输出 RGB、HSV、YCrCb、Lab 等通道结果，其中 HSV 使用手写公式完成转换。</div>
+        <div><strong>图像插值：</strong>实现最近邻和双线性插值，用于缩放、旋转和拉伸变换。</div>
+        <div><strong>交互网页：</strong>使用 Streamlit 实现图片上传、参数调整和结果展示。</div>
+        <div><strong>部署结果：</strong>通过 GitHub 与 Streamlit Community Cloud 获得公网访问 URL。</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>二、训练 / 生成 Prompt</h2>
+      <pre>Vibe Coding Prompt（纯文本）
+
+请使用 Python、OpenCV、NumPy 实现一个“图像颜色空间与图像插值”的课程实验项目。要求：
+
+1. 输入一张图片，读取后转为 RGB 格式。
+2. 实现并输出不同颜色空间的通道图像，包括 RGB 三通道、HSV 三通道，并扩展输出 YCrCb、Lab 等常用颜色空间通道。
+3. HSV 转换需要给出可读的核心算法实现，不能只调用 cv2.cvtColor；OpenCV 可以用于图像读写、辅助颜色空间转换和保存结果。
+4. 实现图像插值算法：
+   - 最近邻插值
+   - 双线性插值
+5. 插值操作需要支持图像放大、缩小、旋转拉伸等变换，并分别输出最近邻和双线性插值结果。
+6. 自动生成测试截图或拼图，便于放入实验报告。
+7. 输出内容包括：
+   - 核心算法 Python 源码
+   - 测试结果截图
+   - 作业小结
+   - 运行方式说明
+
+实现时请保持代码结构清晰，函数命名直观，并在关键算法处添加少量注释。报告语言使用中文，说明实验原理、运行结果与个人总结。</pre>
+    </section>
+
+    <section>
+      <h2>三、实验流程</h2>
+      <ol>
+        <li>使用 OpenCV 读取输入图片，并将 BGR 顺序转换为 RGB 顺序。</li>
+        <li>拆分 RGB 三个通道，保存红、绿、蓝通道图像。</li>
+        <li>根据 RGB 到 HSV 的数学公式，手写实现 HSV 转换，并输出 H、S、V 通道。</li>
+        <li>使用 OpenCV 辅助输出 YCrCb 和 Lab 颜色空间通道，作为扩展对比。</li>
+        <li>实现最近邻插值和双线性插值，分别完成图像放大、缩小、旋转拉伸。</li>
+        <li>自动生成结果截图拼图，用于报告展示。</li>
+        <li>用 Streamlit 封装为网页应用，上传 GitHub 后部署到 Streamlit Community Cloud。</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>四、网站功能与结果截图</h2>
+      <p class="note">在线网站 URL：<a href="https://zhousizuoyeafirst.streamlit.app/" target="_blank" rel="noopener">https://zhousizuoyeafirst.streamlit.app/</a>。网页支持上传图片、查看颜色空间通道，并通过侧边栏参数控制图像缩放、旋转和拉伸。</p>
+
+      <figure>
+        <img src="../outputs/screenshots/color_space_channels.png" alt="颜色空间通道截图">
+        <figcaption>颜色空间通道结果：RGB、HSV、YCrCb 各通道展示</figcaption>
+      </figure>
+
+      <figure>
+        <img src="../outputs/screenshots/interpolation_results.png" alt="图像插值结果截图">
+        <figcaption>图像插值结果：最近邻与双线性插值的缩放、旋转拉伸对比</figcaption>
+      </figure>
+
+      <figure>
+        <img src="../outputs/screenshots/interpolation_detail_compare.png" alt="图像插值局部细节对比">
+        <figcaption>插值局部细节：最近邻插值与双线性插值的平滑度对比</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>五、核心算法说明</h2>
+      <h3>1. 手写 HSV 转换</h3>
+      <p>HSV 转换中，先将 RGB 数值从 0-255 归一化到 0-1。对每个像素计算三个通道中的最大值、最小值和差值，再根据最大通道属于 R、G、B 中的哪一个来计算色相 H。饱和度 S 使用差值除以最大值，明度 V 直接取最大值。最后将 H、S、V 映射回图像可保存的数值范围。</p>
+
+      <h3>2. 最近邻插值</h3>
+      <p>最近邻插值采用反向映射思想。遍历目标图像的每个像素，计算它在原图中的对应坐标，然后选择距离该坐标最近的原图像素作为结果。该方法速度快，但放大图像时容易出现块状感。</p>
+
+      <h3>3. 双线性插值</h3>
+      <p>双线性插值同样采用反向映射，但它不会只取一个最近像素，而是取源坐标周围四个像素，根据横向和纵向距离进行加权平均。它的结果更加平滑，适合图像缩放和几何变换。</p>
+    </section>
+
+    <section>
+      <h2>六、Streamlit 部署说明</h2>
+      <p>本实验的网页入口文件是 <code>streamlit_app.py</code>，依赖文件是 <code>requirements.txt</code>。将代码上传到 GitHub 后，在 Streamlit Community Cloud 中选择对应仓库、分支，并填写入口文件路径即可部署。</p>
+      <p>如果仓库根目录就是本实验文件，入口文件填写：</p>
+      <pre>streamlit_app.py</pre>
+      <p>如果仓库根目录下还有一层 <code>a1</code> 文件夹，入口文件填写：</p>
+      <pre>a1/streamlit_app.py</pre>
+      <p>部署完成后得到的公网 URL 为：</p>
+      <pre>https://zhousizuoyeafirst.streamlit.app/</pre>
+    </section>
+
+    <section>
+      <h2>七、作业小结</h2>
+      <p>本次实验使用 Codex 作为 Vibe Coding Agent，围绕图像颜色空间与图像插值完成了一个完整的小型图像处理项目。通过实验，我理解了 RGB、HSV、YCrCb、Lab 等颜色空间的差异，也通过手写 HSV 转换进一步理解了颜色空间转换的数学过程。</p>
+      <p>在图像插值部分，最近邻插值实现简单、速度较快，但结果边缘较硬；双线性插值通过四邻域加权平均得到更平滑的视觉效果。旋转拉伸等几何变换中使用反向映射，可以避免目标图像出现明显空洞。</p>
+      <p>工程实现方面，Streamlit 可以快速将 Python 图像处理算法封装成网页应用。通过 GitHub 与 Streamlit Community Cloud 部署后，实验结果可以通过公网 URL 访问，便于展示和提交。</p>
+    </section>
+  </main>
+</body>
+</html>
